@@ -3,22 +3,31 @@
 ##############################################################################################################
 import pandas as pd
 import numpy as np
+import sys
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 # implement helper function to give us title if we pass in index
 ##########################################################
 def get_title(index):
     
-    return movie_list[movie_list.index == index]['title'].values[0]
+    try:
+        return movie_list[movie_list.index == index]['title'].values[0]
+    except:
+        print('Movie not found in database.')
+        sys.exit()
     
 # helper function to give us index if we pass in title
 def get_index(title):
     
-    return movie_list[movie_list['title'] == title]['index'].values[0]
+    try:
+        return movie_list[movie_list['title'] == title]['index'].values[0]
+    except:
+        print('Movie not found in database.')
+        sys.exit()
 
 #########################################################
 # uses pandas to read the csv of movie info
-movie_list = pd.read_csv('movie_recommender/movie_dataset.csv')
+movie_list = pd.read_csv('movie_recommender/MovieRecommendor/movie_dataset.csv')
 # column names on the movie dataset, looking for these when we want to make connections to curate recommendation
 look_for = ['keywords', 'cast', 'genres', 'director']
 
@@ -28,13 +37,10 @@ for i in look_for:
 # function to combine values from the look for into a single string
 ######################################
 def combine_looked(row):
-    
+    # looks through the data set for values to relate movies to each other with
     try:
-        
         return row['keywords'] + ' ' + row['cast'] + ' ' + row['genres'] + ' ' + row['director']
-    
     except:
-        
         print('Error: ', row )
 #########################################
 
@@ -55,7 +61,7 @@ similar = list(enumerate(cosine_simholder[movie_index]))
 # nd returns x[1] (second element of the tuple)
 # we want the second element of the tuple since we know the most similar movie is the movie itself
 # reverse = true sorts the list in descending order
-sort_similar = sorted(similar, key = lambda x:x[1], reverse = True)
+sort_similar = sorted(similar, key = lambda x:x[1], reverse = True)[1:]
 
 
 # print the similar movie names
@@ -64,5 +70,5 @@ for element in sort_similar:
     
     print(get_title(element[0]))
     i = i+1
-    if i>10:
+    if i>=10:
         break
